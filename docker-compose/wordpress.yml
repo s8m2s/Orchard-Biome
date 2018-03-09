@@ -1,0 +1,70 @@
+version: '3'
+
+services:
+
+# to-do install php7.0-zip
+# to-do add Postfix for email
+# to-do install snmp to resolve errors
+  web:
+    image: fauria/lamp
+    restart: always
+    networks:
+      - db
+      - biome
+    volumes:
+      - ./:/var/www/html
+    environment:
+      - VIRTUAL_HOST=${URL}
+
+  db:
+    image: mysql
+    restart: always
+    networks:
+      - db
+    volumes:
+      - dbdata:/var/lib/mysql # store data in local volume so it does not get lost if you rebuid container
+    environment:
+      MYSQL_USER: root
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: wordpress
+
+  adminer:
+    image: adminer
+    restart: always
+    networks:
+      - biome
+      - db
+    environment:
+      - VIRTUAL_HOST=adminer.${URL}
+
+  pma:
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    networks:
+      - biome
+      - db
+    environment:
+      - VIRTUAL_HOST=pma.${URL}
+
+  # to enter workspace run:
+  # $ docker-compose exec workspace bash
+  workspace:
+    image: montag451/php-gulp-wp:latest
+    expose:
+      - "3000"
+    networks:
+      - biome
+      - db
+    volumes:
+      - ./:/workspace # store data in local volume so it does not get lost if you rebuid container
+    stdin_open: true
+    tty: true
+
+volumes:
+  dbdata:
+  
+networks:
+  db:
+  biome:
+    external:
+      name: biome
