@@ -50,8 +50,10 @@ services:
   # $ docker-compose exec workspace bash
   workspace:
     image: montag451/php-gulp-wp:latest
+  #  build: ../docker/workspaces/php-gulp-wp
+    restart: always
     expose:
-      - "3000"
+      - "80"
     networks:
       - biome
       - db
@@ -59,6 +61,11 @@ services:
       - ./:/workspace # store data in local volume so it does not get lost if you rebuid container
     stdin_open: true
     tty: true
+    environment:
+      - HOST_USER=${USER}
+#    user: 1000:1000
+#    entrypoint: /workspace/impersonate.sh
+#    command: su ${USER}
 
 volumes:
   dbdata:

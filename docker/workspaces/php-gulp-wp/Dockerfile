@@ -36,8 +36,13 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
 	&& php -r "unlink('composer-setup.php');" \
 	&& mv composer.phar /usr/local/bin/composer
 
+# match uid of container user to host user. Needed so that host files are not owned by root
+ADD --chown=1 impersonate.sh /usr/bin/impersonate
+
+
+
 ENV DATE_TIMEZONE UTC
 
 WORKDIR /workspace
 
-ENTRYPOINT bash
+ENTRYPOINT impersonate
