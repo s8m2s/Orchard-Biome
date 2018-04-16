@@ -10,6 +10,7 @@ RUN apt update && apt install -y \
     php7.0-curl \
     php7.0-json \
     php7.0-mysql \
+    php7.0-zip \
     git \
     curl \
     tree \
@@ -17,7 +18,10 @@ RUN apt update && apt install -y \
     vim \
     ssh \
     man \
-    sudo
+    sudo \
+    tmux \
+    zsh \
+    screen
 
 # create docker user and switch for remaining installs
 RUN useradd --uid 1000 --create-home --shell /bin/bash --groups root,sudo docker \
