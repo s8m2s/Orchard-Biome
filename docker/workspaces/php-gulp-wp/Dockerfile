@@ -21,6 +21,7 @@ RUN apt update && apt install -y \
     sudo \
     tmux \
     zsh \
+    mysql-client \
     screen
 
 # create docker user and switch for remaining installs
