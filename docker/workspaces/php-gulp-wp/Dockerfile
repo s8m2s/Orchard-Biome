@@ -1,25 +1,24 @@
-# docker run -it --rm -v "$PWD":/${PWD##*/} php:7.2.2-cli-stretch bash
-# wp migratedb pull https://demo:go4sight@go4sight.wpengine.com QVD4B2knqPkHqBYSo4uggxdGGMOm+vpQpSG3gjDL --find=//go4sight.wpengine.com,/nas/content/live/go4sight,https://go4sight.local --replace=//go4sight.local,"/Users/wproscott/Managed Source/go4sight.com",http://go4sight.local --skip-replace-guids --media=compare-and-remove --allow-root
+FROM ubuntu:18.04
 
-FROM ubuntu:16.04
+ENV DEBIAN_FRONTEND noninteractive
 
 # Install Packages
-RUN apt update && apt install -y \
-  php7.0 \
-  php7.0-cli \
-  php7.0-curl \
-  php7.0-json \
-  php7.0-mysql \
+RUN apt-get update && apt-get install -y \
+  php \
+  php-cli \
+  php-curl \
+  php-json \
+  php-mysql \
   git \
   curl \
   tree \
   ftp \
   vim \
-  ssh
-
-# Install Nodejs 8 (Stable as of )
-RUN curl -sL https://deb.nodesource.com/setup_8.x | bash - \
-	&& apt install -y nodejs
+  ssh \
+  tmux \
+  zsh \
+  nodejs \
+  npm 
 
 # Install gulp globaly
 RUN npm install gulp -g
@@ -36,8 +35,13 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
 	&& php -r "unlink('composer-setup.php');" \
 	&& mv composer.phar /usr/local/bin/composer
 
+# Set locale to en_US.utf8
+RUN apt-get update && apt-get install -y locales && rm -rf /var/lib/apt/lists/* \
+    && localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
+ENV LANG en_US.utf8
+
 ENV DATE_TIMEZONE UTC
 
 WORKDIR /workspace
 
-ENTRYPOINT bash
+ENTRYPOINT tmux new -s workspace 
