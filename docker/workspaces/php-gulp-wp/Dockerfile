@@ -19,7 +19,8 @@ RUN apt-get update && apt-get install -y \
     zsh \
     nodejs \
     npm \
-    locales
+    locales \
+    mysql-client
 
 # Install gulp globaly
 RUN npm install gulp -g
