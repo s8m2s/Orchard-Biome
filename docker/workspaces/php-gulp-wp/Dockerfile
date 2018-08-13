@@ -5,10 +5,12 @@ ENV DEBIAN_FRONTEND noninteractive
 
 # Install Packages
 RUN apt-get update && apt-get install -y \
-    php-cli \
-    php-curl \
-    php-json \
-    php-mysql \
+    php7.2 \
+    php7.2-cli \
+    php7.2-curl \
+    php7.2-json \
+    php7.2-mysql \
+    php7.2-zip \
     git \
     curl \
     vim \
