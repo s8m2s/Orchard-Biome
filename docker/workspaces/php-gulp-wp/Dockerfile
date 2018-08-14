@@ -19,26 +19,21 @@ RUN apt-get update && apt-get install -y \
     zsh \
     locales \
     sudo \
-    mysql-client
-
+    mysql-client \
+    nodejs \
+    npm
+    
 # Set locale to en_US.utf8
 RUN rm -rf /var/lib/apt/lists/* \
     && localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
 ENV LANG en_US.utf8
 
-# create docker user and switch for remaining installs
-# RUN useradd --uid 1000 --create-home --shell /bin/bash --groups root,sudo docker \
-#    && echo "docker ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
-
-# RUN su docker
-
-# Install Nodejs
-RUN apt-get update && sudo apt-get install -y \
-    nodejs \
-    npm
-
 # Install gulp globaly
 RUN npm install gulp -g
+
+# create docker user and switch for remaining installs
+RUN useradd --uid 1000 --create-home --shell /bin/bash --groups root,sudo docker \
+   && echo "docker ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
 
 # Install WP CLI
 RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
@@ -53,15 +48,22 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
     && mv composer.phar /usr/local/bin/composer
 
 # match uid of container user to host user. Needed so that host files are not owned by root
-COPY --chown=1 impersonate.sh /usr/local/bin/impersonate
+# COPY --chown=1 impersonate.sh /usr/local/bin/impersonate
 
 # Install oh-my-zsh
 RUN bash -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
 
 # Clean up
-RUN sudo apt-get clean \
+RUN apt-get clean \
     && npm cache clean --force
+
+USER docker
+
+# Copy .files from root to docker user
+RUN sudo cp -a /root/. /home/docker/ \
+    && sudo chown -R docker:docker /home/docker/
 
 WORKDIR /workspace
 
 ENTRYPOINT bash
+
