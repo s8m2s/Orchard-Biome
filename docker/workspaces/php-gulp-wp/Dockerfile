@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM montag451/ubuntu-node
 
 # Prevent apt packages from requesting input durring install
 ENV DEBIAN_FRONTEND noninteractive
@@ -6,37 +6,22 @@ ENV DEBIAN_FRONTEND noninteractive
 # Install Packages
 RUN apt-get update && apt-get install -y \
     curl \
-    git \
-    locales \
     man \
     mysql-client \
-    nodejs \
-    npm \
     php7.2 \
     php7.2-cli \
     php7.2-curl \
     php7.2-json \
     php7.2-mysql \
     php7.2-zip \
-    ssh \
     sudo \
     tmux \
     vim \
-    zsh \
     && rm -rf /var/lib/apt/lists/*
-    
-# Set locale to en_US.utf8
-RUN rm -rf /var/lib/apt/lists/* \
-    && localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
-ENV LANG en_US.utf8
-
-# Install gulp globaly
-RUN npm install gulp -g \
-    && npm cache clean
 
 # create docker user and switch for remaining installs
 RUN groupadd --gid 1000 docker \
-    && useradd --uid 1000 --gid docker --create-home --shell /bin/zsh --groups root,sudo docker \
+    && useradd --uid 1000 --gid docker --create-home --shell /bin/bash --groups root,sudo docker \
     && echo "docker ALL=(ALL:ALL) NOPASSWD:ALL" >> /etc/sudoers
 USER docker
 WORKDIR /home/docker
@@ -53,9 +38,6 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
     && php -r "unlink('composer-setup.php');" \
     && sudo mv composer.phar /usr/local/bin/composer
 
-# Install oh-my-zsh
-RUN bash -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
-
 WORKDIR /workspace
 
-ENTRYPOINT zsh
+ENTRYPOINT bash
