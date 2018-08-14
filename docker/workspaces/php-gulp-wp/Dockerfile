@@ -5,23 +5,25 @@ ENV DEBIAN_FRONTEND noninteractive
 
 # Install Packages
 RUN apt-get update && apt-get install -y \
+    curl \
+    git \
+    locales \
+    man \
+    mysql-client \
+    nodejs \
+    npm \
     php7.2 \
     php7.2-cli \
     php7.2-curl \
     php7.2-json \
     php7.2-mysql \
     php7.2-zip \
-    git \
-    curl \
-    vim \
     ssh \
-    tmux \
-    zsh \
-    locales \
     sudo \
-    mysql-client \
-    nodejs \
-    npm
+    tmux \
+    vim \
+    zsh \
+    && rm -rf /var/lib/apt/lists/*
     
 # Set locale to en_US.utf8
 RUN rm -rf /var/lib/apt/lists/* \
@@ -29,41 +31,31 @@ RUN rm -rf /var/lib/apt/lists/* \
 ENV LANG en_US.utf8
 
 # Install gulp globaly
-RUN npm install gulp -g
+RUN npm install gulp -g \
+    && npm cache clean
 
 # create docker user and switch for remaining installs
-RUN useradd --uid 1000 --create-home --shell /bin/bash --groups root,sudo docker \
-   && echo "docker ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
+RUN groupadd --gid 1000 docker \
+    && useradd --uid 1000 --gid docker --create-home --shell /bin/zsh --groups root,sudo docker \
+    && echo "docker ALL=(ALL:ALL) NOPASSWD:ALL" >> /etc/sudoers
+USER docker
+WORKDIR /home/docker
 
 # Install WP CLI
 RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
     && chmod +x wp-cli.phar \
-    && mv wp-cli.phar /usr/local/bin/wp
+    && sudo mv wp-cli.phar /usr/local/bin/wp
 
 # Install composer
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
     && php -r "if (hash_file('SHA384', 'composer-setup.php') === '544e09ee996cdf60ece3804abc52599c22b1f40f4323403c44d44fdfdd586475ca9813a858088ffbc1f233e9b180f061') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;" \
     && php composer-setup.php \
     && php -r "unlink('composer-setup.php');" \
-    && mv composer.phar /usr/local/bin/composer
-
-# match uid of container user to host user. Needed so that host files are not owned by root
-# COPY --chown=1 impersonate.sh /usr/local/bin/impersonate
+    && sudo mv composer.phar /usr/local/bin/composer
 
 # Install oh-my-zsh
 RUN bash -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
 
-# Clean up
-RUN apt-get clean \
-    && npm cache clean --force
-
-USER docker
-
-# Copy .files from root to docker user
-RUN sudo cp -a /root/. /home/docker/ \
-    && sudo chown -R docker:docker /home/docker/
-
 WORKDIR /workspace
 
-ENTRYPOINT bash
-
+ENTRYPOINT zsh
