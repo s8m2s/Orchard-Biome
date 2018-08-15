@@ -1,4 +1,4 @@
-FROM montag451/ubuntu-node
+FROM wpromote/ubuntu-node-gulp
 
 # Prevent apt packages from requesting input durring install
 ENV DEBIAN_FRONTEND noninteractive
